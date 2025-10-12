@@ -1,0 +1,26 @@
+---
+layout: null
+---
+{
+  "version": "1.0.0",
+  "name": "ttrpg-gm-tools",
+  "description": "TTRPG GM Tools - A Model Context Protocol server for tabletop RPG game masters",
+  "vendor": "TedTschopp",
+  "homepage": "{{ site.url }}{{ site.baseurl }}",
+  "protocol": {
+    "version": "2024-11-05"
+  },
+  "capabilities": {
+    "tools": {},
+    "resources": {},
+    "prompts": {}
+  },
+  "transport": {
+    "type": "sse",
+    "endpoints": {
+      "tools": "{{ site.url }}{{ site.baseurl }}/api/tools.json",
+      "resources": "{{ site.url }}{{ site.baseurl }}/api/resources.json",
+      "prompts": "{{ site.url }}{{ site.baseurl }}/api/prompts.json"
+    }
+  }
+}

@@ -1,0 +1,152 @@
+---
+layout: default
+title: TTRPG GM Tools MCP Server
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1e3c72;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2a5298;
+            margin-top: 30px;
+        }
+        .tool {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2a5298;
+            border-radius: 5px;
+        }
+        .tool h3 {
+            margin-top: 0;
+            color: #1e3c72;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .dice {
+            font-size: 2em;
+            margin-right: 10px;
+        }
+        .endpoint {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="dice">🎲</span>TTRPG GM Tools MCP Server</h1>
+        
+        <p>A <strong>Model Context Protocol</strong> server for tabletop RPG game masters, providing tools for generating encounters, NPCs, locations, and more!</p>
+
+        <h2>📡 MCP Endpoint</h2>
+        <div class="endpoint">
+            {{ site.url }}{{ site.baseurl }}/mcp.json
+        </div>
+
+        <h2>🛠️ Available Tools</h2>
+
+        <div class="tool">
+            <h3>🗡️ Generate Random Encounter</h3>
+            <p>Create random encounters based on party level, environment type, and difficulty.</p>
+            <p><strong>Parameters:</strong> level (1-20), environment (forest, dungeon, city, etc.), difficulty (easy, medium, hard, deadly)</p>
+        </div>
+
+        <div class="tool">
+            <h3>👤 Generate NPC Name</h3>
+            <p>Generate character names for various fantasy races and cultures.</p>
+            <p><strong>Parameters:</strong> race (human, elf, dwarf, orc, etc.), gender (optional)</p>
+        </div>
+
+        <div class="tool">
+            <h3>🏛️ Generate Location Name</h3>
+            <p>Create names for taverns, cities, dungeons, and other locations.</p>
+            <p><strong>Parameters:</strong> type (tavern, city, dungeon, shop, guild)</p>
+        </div>
+
+        <div class="tool">
+            <h3>🎭 Generate Personality Traits</h3>
+            <p>Create personality traits, ideals, bonds, and flaws for NPCs.</p>
+            <p><strong>Parameters:</strong> count (number of traits to generate)</p>
+        </div>
+
+        <div class="tool">
+            <h3>💰 Generate Treasure</h3>
+            <p>Generate treasure hoards and loot based on challenge rating.</p>
+            <p><strong>Parameters:</strong> cr (challenge rating 0-30), type (individual, hoard)</p>
+        </div>
+
+        <div class="tool">
+            <h3>🌤️ Generate Weather</h3>
+            <p>Create atmospheric weather descriptions for your game sessions.</p>
+            <p><strong>Parameters:</strong> climate (temperate, arctic, desert, tropical), season (optional)</p>
+        </div>
+
+        <div class="tool">
+            <h3>📖 Generate Plot Hook</h3>
+            <p>Generate adventure hooks and quest ideas for your campaign.</p>
+            <p><strong>Parameters:</strong> theme (mystery, combat, intrigue, exploration, horror)</p>
+        </div>
+
+        <h2>🔧 Setup Instructions</h2>
+        
+        <p>To use this MCP server with Claude Desktop or other MCP clients, add this to your configuration:</p>
+
+        <pre><code>{
+  "mcpServers": {
+    "ttrpg-gm-tools": {
+      "url": "{{ site.url }}{{ site.baseurl }}/mcp.json",
+      "transport": "sse"
+    }
+  }
+}</code></pre>
+
+        <h2>📚 Resources</h2>
+        <ul>
+            <li><a href="https://github.com/{{ site.github.owner_name }}/{{ site.github.repository_name }}">GitHub Repository</a></li>
+            <li><a href="https://modelcontextprotocol.io/">Model Context Protocol Docs</a></li>
+            <li><a href="{{ site.baseurl }}/mcp.json">View MCP Manifest</a></li>
+        </ul>
+
+        <h2>🤝 Contributing</h2>
+        <p>Want to add more tools, encounters, or names? Contributions are welcome! Check out the GitHub repository to contribute.</p>
+    </div>
+</body>
+</html>
