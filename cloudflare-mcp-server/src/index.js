@@ -18,7 +18,10 @@ async function fetchData(filename) {
 const tools = {
   async generate_encounter({ level, environment, difficulty = 'medium' }) {
     const data = await fetchData('encounters.json');
-    const encounters = data.encounters[environment]?.[difficulty] || [];
+    // Normalize inputs to lowercase for lookup
+    const normalizedEnv = environment?.toLowerCase();
+    const normalizedDiff = difficulty?.toLowerCase();
+    const encounters = data.encounters[normalizedEnv]?.[normalizedDiff] || [];
     
     if (encounters.length === 0) {
       return { error: `No encounters found for ${environment} / ${difficulty}` };
@@ -26,8 +29,8 @@ const tools = {
     
     const encounter = encounters[Math.floor(Math.random() * encounters.length)];
     return {
-      environment,
-      difficulty,
+      environment: normalizedEnv,
+      difficulty: normalizedDiff,
       partyLevel: level,
       ...encounter
     };
@@ -35,19 +38,24 @@ const tools = {
 
   async generate_npc_name({ race, gender }) {
     const data = await fetchData('names.json');
-    const names = data.names[race]?.[gender] || [];
+    // Normalize inputs to lowercase for lookup
+    const normalizedRace = race?.toLowerCase();
+    const normalizedGender = gender?.toLowerCase();
+    const names = data.names[normalizedRace]?.[normalizedGender] || [];
     
     if (names.length === 0) {
       return { error: `No names found for ${race} / ${gender}` };
     }
     
     const name = names[Math.floor(Math.random() * names.length)];
-    return { name, race, gender };
+    return { name, race: normalizedRace, gender: normalizedGender };
   },
 
   async generate_location_name({ type }) {
     const data = await fetchData('locations.json');
-    const location = data.locations[type];
+    // Normalize type to lowercase for lookup
+    const normalizedType = type?.toLowerCase();
+    const location = data.locations[normalizedType];
     
     if (!location) {
       return { error: `No location type found: ${type}` };
@@ -58,7 +66,7 @@ const tools = {
     
     return {
       name: `${prefix} ${suffix}`,
-      type
+      type: normalizedType
     };
   },
 
@@ -115,7 +123,8 @@ const tools = {
     
     // Add random items for hoard type
     const treasureItems = [];
-    if (type === 'hoard' && cr >= 5) {
+    const normalizedType = type?.toLowerCase();
+    if (normalizedType === 'hoard' && cr >= 5) {
       const itemPool = cr >= 11 ? items.magic_major : items.magic_medium;
       const numItems = Math.floor(Math.random() * 3) + 1;
       for (let i = 0; i < numItems; i++) {
@@ -125,7 +134,7 @@ const tools = {
     
     return {
       challengeRating: cr,
-      type,
+      type: normalizedType,
       coins,
       items: treasureItems
     };
@@ -133,21 +142,26 @@ const tools = {
 
   async generate_weather({ climate, season }) {
     const data = await fetchData('weather.json');
-    const weatherOptions = season && data.weather[climate]?.[season] 
-      ? data.weather[climate][season]
-      : data.weather[climate]?.any || [];
+    // Normalize inputs to lowercase for lookup
+    const normalizedClimate = climate?.toLowerCase();
+    const normalizedSeason = season?.toLowerCase();
+    const weatherOptions = normalizedSeason && data.weather[normalizedClimate]?.[normalizedSeason] 
+      ? data.weather[normalizedClimate][normalizedSeason]
+      : data.weather[normalizedClimate]?.any || [];
     
     if (weatherOptions.length === 0) {
       return { error: `No weather found for ${climate} / ${season}` };
     }
     
     const description = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
-    return { climate, season, description };
+    return { climate: normalizedClimate, season: normalizedSeason, description };
   },
 
   async generate_plot_hook({ theme, level }) {
     const data = await fetchData('plot_hooks.json');
-    const hooks = data.plot_hooks[theme] || [];
+    // Normalize theme to lowercase for lookup
+    const normalizedTheme = theme?.toLowerCase();
+    const hooks = data.plot_hooks[normalizedTheme] || [];
     
     if (hooks.length === 0) {
       return { error: `No plot hooks found for theme: ${theme}` };
@@ -155,7 +169,7 @@ const tools = {
     
     const hook = hooks[Math.floor(Math.random() * hooks.length)];
     return {
-      theme,
+      theme: normalizedTheme,
       suggestedLevel: level,
       hook
     };
@@ -164,23 +178,39 @@ const tools = {
 
 // MCP Protocol Handler
 async function handleMCPRequest(request) {
-  const { method, params } = await request.json();
+  const body = await request.json();
+  const { jsonrpc, id, method, params } = body;
+  
+  // Helper to create JSON-RPC response
+  const createResponse = (result) => ({
+    jsonrpc: '2.0',
+    id: id,
+    result: result
+  });
+  
+  const createError = (code, message) => ({
+    jsonrpc: '2.0',
+    id: id,
+    error: { code, message }
+  });
   
   switch (method) {
     case 'initialize':
-      return {
+      return createResponse({
         protocolVersion: '2024-11-05',
         capabilities: {
-          tools: {}
+          tools: {},
+          resources: {},
+          prompts: {}
         },
         serverInfo: {
           name: 'ttrpg-gm-tools',
           version: '1.0.0'
         }
-      };
+      });
     
     case 'tools/list':
-      return {
+      return createResponse({
         tools: [
           {
             name: 'generate_encounter',
@@ -265,23 +295,202 @@ async function handleMCPRequest(request) {
             }
           }
         ]
+      });
+    
+    case 'resources/list':
+      return createResponse({
+        resources: [
+          {
+            uri: 'ttrpg://data/encounters',
+            name: 'Encounter Database',
+            description: 'Complete database of random encounters organized by environment and difficulty',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/names',
+            name: 'Name Database',
+            description: 'Fantasy name lists organized by race and gender',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/locations',
+            name: 'Location Names',
+            description: 'Location name components and templates',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/traits',
+            name: 'Personality Traits',
+            description: 'Personality traits, ideals, bonds, and flaws for NPCs',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/treasure',
+            name: 'Treasure Tables',
+            description: 'Treasure and loot tables by challenge rating',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/weather',
+            name: 'Weather Descriptions',
+            description: 'Weather conditions by climate and season',
+            mimeType: 'application/json'
+          },
+          {
+            uri: 'ttrpg://data/plot-hooks',
+            name: 'Plot Hooks',
+            description: 'Adventure hooks and quest ideas by theme',
+            mimeType: 'application/json'
+          }
+        ]
+      });
+    
+    case 'resources/read':
+      const resourceUri = params.uri;
+      const resourceMap = {
+        'ttrpg://data/encounters': 'encounters.json',
+        'ttrpg://data/names': 'names.json',
+        'ttrpg://data/locations': 'locations.json',
+        'ttrpg://data/traits': 'traits.json',
+        'ttrpg://data/treasure': 'treasure.json',
+        'ttrpg://data/weather': 'weather.json',
+        'ttrpg://data/plot-hooks': 'plot_hooks.json'
       };
+      
+      const filename = resourceMap[resourceUri];
+      if (!filename) {
+        return createError(-32602, `Unknown resource URI: ${resourceUri}`);
+      }
+      
+      try {
+        const data = await fetchData(filename);
+        return createResponse({
+          contents: [
+            {
+              uri: resourceUri,
+              mimeType: 'application/json',
+              text: JSON.stringify(data, null, 2)
+            }
+          ]
+        });
+      } catch (error) {
+        return createError(-32603, `Failed to read resource: ${error.message}`);
+      }
+    
+    case 'prompts/list':
+      return createResponse({
+        prompts: [
+          {
+            name: 'session_prep',
+            description: 'Prepare a complete game session with encounters, NPCs, and plot hooks',
+            arguments: [
+              {
+                name: 'party_level',
+                description: 'Average party level',
+                required: true
+              },
+              {
+                name: 'session_theme',
+                description: 'Theme or focus of the session',
+                required: true
+              }
+            ]
+          },
+          {
+            name: 'quick_npc',
+            description: 'Generate a complete NPC with name, personality, and background',
+            arguments: [
+              {
+                name: 'role',
+                description: "NPC's role (merchant, guard, villain, ally, etc.)",
+                required: true
+              }
+            ]
+          },
+          {
+            name: 'dungeon_room',
+            description: 'Generate a dungeon room with encounter, treasure, and description',
+            arguments: [
+              {
+                name: 'party_level',
+                description: 'Average party level',
+                required: true
+              },
+              {
+                name: 'difficulty',
+                description: 'Room difficulty',
+                required: false
+              }
+            ]
+          }
+        ]
+      });
+    
+    case 'prompts/get':
+      const promptName = params.name;
+      const promptArgs = params.arguments || {};
+      
+      if (promptName === 'session_prep') {
+        const { party_level, session_theme } = promptArgs;
+        return createResponse({
+          description: `Session preparation for level ${party_level} party with ${session_theme} theme`,
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: `Create a complete game session for a level ${party_level} party with a ${session_theme} theme. Include: 1) A main encounter appropriate for the party level, 2) 2-3 NPCs they might meet, 3) A plot hook to drive the session, 4) Potential treasure rewards, 5) Weather/atmosphere description.`
+              }
+            }
+          ]
+        });
+      } else if (promptName === 'quick_npc') {
+        const { role } = promptArgs;
+        return createResponse({
+          description: `Generate a complete ${role} NPC`,
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: `Create a detailed ${role} NPC including: 1) A fantasy name (choose appropriate race/gender), 2) 2-3 personality traits, 3) A brief backstory (2-3 sentences), 4) What they want from the party, 5) A unique quirk or mannerism.`
+              }
+            }
+          ]
+        });
+      } else if (promptName === 'dungeon_room') {
+        const { party_level, difficulty = 'medium' } = promptArgs;
+        return createResponse({
+          description: `Generate a dungeon room for level ${party_level} party at ${difficulty} difficulty`,
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: `Create a dungeon room for a level ${party_level} party at ${difficulty} difficulty. Include: 1) Room description and atmosphere, 2) An encounter in the room (if any), 3) Treasure or rewards, 4) Potential hazards or traps, 5) Clues or secrets players might discover.`
+              }
+            }
+          ]
+        });
+      } else {
+        return createError(-32602, `Unknown prompt: ${promptName}`);
+      }
     
     case 'tools/call':
       const { name, arguments: args } = params;
       if (tools[name]) {
         try {
           const result = await tools[name](args);
-          return {
+          return createResponse({
             content: [
               {
                 type: 'text',
                 text: JSON.stringify(result, null, 2)
               }
             ]
-          };
+          });
         } catch (error) {
-          return {
+          return createResponse({
             content: [
               {
                 type: 'text',
@@ -289,21 +498,13 @@ async function handleMCPRequest(request) {
               }
             ],
             isError: true
-          };
+          });
         }
       }
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify({ error: `Unknown tool: ${name}` }, null, 2)
-          }
-        ],
-        isError: true
-      };
+      return createError(-32601, `Unknown tool: ${name}`);
     
     default:
-      return { error: `Unknown method: ${method}` };
+      return createError(-32601, `Unknown method: ${method}`);
   }
 }
 
