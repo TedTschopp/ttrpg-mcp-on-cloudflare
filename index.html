@@ -16,7 +16,8 @@ title: TTRPG GM Tools MCP Server
             margin: 0 auto;
             padding: 20px;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: #333;
+            color: #212529; /* Darker for better contrast - 4.5:1 ratio */
+            line-height: 1.6; /* Improved readability */
         }
         .container {
             background: white;
@@ -25,48 +26,84 @@ title: TTRPG GM Tools MCP Server
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         h1 {
-            color: #1e3c72;
-            border-bottom: 3px solid #2a5298;
+            color: #0d2847; /* Darker blue for 7:1 contrast ratio */
+            border-bottom: 3px solid #1e4976;
             padding-bottom: 10px;
         }
         h2 {
-            color: #2a5298;
+            color: #1e4976; /* Darker blue for 7:1 contrast ratio */
             margin-top: 30px;
         }
         .tool {
             background: #f8f9fa;
             padding: 15px;
             margin: 10px 0;
-            border-left: 4px solid #2a5298;
+            border-left: 4px solid #1e4976;
             border-radius: 5px;
         }
         .tool h3 {
             margin-top: 0;
-            color: #1e3c72;
+            color: #0d2847; /* Darker for better contrast */
         }
         code {
             background: #e9ecef;
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
+            color: #212529; /* Dark text for contrast */
         }
         pre {
-            background: #2d2d2d;
-            color: #f8f8f2;
+            background: #1a1a1a; /* Darker background */
+            color: #f8f9fa; /* Lighter text for 15:1 contrast */
             padding: 20px;
             border-radius: 5px;
             overflow-x: auto;
+            border: 1px solid #343a40; /* Subtle border */
+        }
+        pre code {
+            background: transparent;
+            color: inherit;
         }
         .dice {
             font-size: 2em;
             margin-right: 10px;
+            /* Emojis have inherent contrast */
         }
         .endpoint {
-            background: #fff3cd;
-            padding: 10px;
+            background: #fff8dc; /* Lighter cream color */
+            color: #1a1a1a; /* Very dark text - 12:1 contrast ratio */
+            padding: 12px;
             border-radius: 5px;
             margin: 10px 0;
             font-family: monospace;
+            font-weight: 600; /* Bolder for emphasis */
+            border: 2px solid #f0e68c; /* Subtle border */
+        }
+        /* Link styles for WCAG AA compliance */
+        a {
+            color: #0056b3; /* Dark blue for 7:1 contrast */
+            text-decoration: underline;
+        }
+        a:hover {
+            color: #003d82; /* Even darker on hover */
+            text-decoration: underline;
+        }
+        a:focus {
+            outline: 3px solid #0056b3;
+            outline-offset: 2px;
+            background-color: #fff3cd;
+        }
+        /* Strong text for better emphasis */
+        strong {
+            font-weight: 600;
+            color: #212529;
+        }
+        /* Ensure lists have good spacing */
+        ul, ol {
+            line-height: 1.8;
+        }
+        li {
+            margin: 8px 0;
         }
     </style>
 </head>
