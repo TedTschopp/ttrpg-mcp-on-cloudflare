@@ -7,3 +7,12 @@ vendor/
 *.gem
 Gemfile.lock
 .DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Cloudflare Workers
+cloudflare-mcp-server/.wrangler/
+cloudflare-mcp-server/dist/
