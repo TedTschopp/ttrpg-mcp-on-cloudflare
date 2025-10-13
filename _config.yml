@@ -9,7 +9,17 @@ repository: TedTschopp/MCP-Server-Using-Github-Pages
 
 # Build settings
 markdown: kramdown
-theme: minima
+remote_theme: just-the-docs/just-the-docs
+
+# Plugins
+plugins:
+- jekyll-remote-theme
+- jekyll-seo-tag
+
+# Just the Docs theme configuration
+color_scheme: light
+search_enabled: true
+heading_anchors: true
 
 # Exclude files from build
 exclude:

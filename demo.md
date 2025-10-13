@@ -1,6 +1,8 @@
 ---
 layout: default
 title: Interactive Demo
+nav_order: 2
+description: "Try the TTRPG GM Tools in your browser"
 ---
 
 <style>

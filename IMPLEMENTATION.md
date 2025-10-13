@@ -1,5 +1,20 @@
-# TTRPG GM Tools - MCP Server
-# Server Implementation Notes
+---
+layout: default
+title: Implementation
+nav_order: 5
+description: "Technical architecture and implementation details"
+---
+
+# Implementation Notes
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## Architecture
 

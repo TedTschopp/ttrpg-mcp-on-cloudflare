@@ -1,3 +1,14 @@
+---
+layout: default
+title: Home
+nav_order: 1
+description: "TTRPG GM Tools MCP Server - A Model Context Protocol server for tabletop RPG game masters"
+permalink: /
+---
+
+# 🎲 TTRPG GM Tools MCP Server
+{: .no_toc }
+
 A **Model Context Protocol** server for tabletop RPG game masters, providing tools for generating encounters, NPCs, locations, and more!
 
 ## 📡 MCP Endpoint

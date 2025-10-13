@@ -1,4 +1,20 @@
+---
+layout: default
+title: Deployment Guide
+nav_order: 4
+description: "Deploy your own TTRPG MCP Server"
+---
+
 # 🚀 Deployment Guide
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## Quick Start
 

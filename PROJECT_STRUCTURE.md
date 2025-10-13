@@ -1,4 +1,22 @@
+---
+layout: default
+title: Project Structure
+nav_order: 6
+description: "File organization and structure"
+---
+
 # Project Structure
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
+## Directory Layout
 
 ```
 MCP-Server-Using-Github-Pages/

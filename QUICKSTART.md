@@ -1,4 +1,20 @@
+---
+layout: default
+title: Quick Start Guide
+nav_order: 3
+description: "Get started with TTRPG GM Tools in 5 minutes"
+---
+
 # Quick Start Guide
+{: .no_toc }
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
 
 ## Local Development
 

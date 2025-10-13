@@ -1,0 +1,105 @@
+---
+---
+
+/* Custom CSS for Read the Docs theme */
+/* WCAG AA Compliant styling */
+
+/* Override theme defaults if needed */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Ensure good contrast ratios */
+a {
+  color: #0066cc;
+}
+
+a:hover {
+  color: #004080;
+}
+
+/* Code blocks */
+code {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+/* Improve table styling */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Demo page specific styles */
+.tool-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+}
+
+button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+button:hover {
+  background: #004080;
+}
+
+button:focus {
+  outline: 3px solid #ffd700;
+  outline-offset: 2px;
+}
+
+.result {
+  margin-top: 15px;
+  padding: 15px;
+  background: white;
+  border-left: 4px solid #0066cc;
+  border-radius: 3px;
+}
+
+select, input {
+  padding: 8px;
+  margin: 5px;
+  border: 1px solid #bdc3c7;
+  border-radius: 3px;
+}
+
+.error {
+  background: #e74c3c;
+  color: white;
+  padding: 10px;
+  border-radius: 3px;
+  margin: 10px 0;
+}
