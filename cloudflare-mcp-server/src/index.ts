@@ -14,6 +14,7 @@ function buildCorsHeaders(origin: string | null, allowedOrigins: string[]): Reco
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, MCP-Protocol-Version, Mcp-Protocol-Version, Mcp-Session-Id",
+    "Access-Control-Expose-Headers": "X-TTRPG-MCP-Version, X-TTRPG-MCP-Commit, X-TTRPG-MCP-Build-Time",
   };
 
   if (origin && allowedOrigins.length > 0) {
@@ -22,6 +23,47 @@ function buildCorsHeaders(origin: string | null, allowedOrigins: string[]): Reco
   }
 
   return headers;
+}
+
+function buildFingerprintHeaders(env: Env): Record<string, string> {
+  const version = env.BUILD_VERSION?.trim();
+  const commit = env.BUILD_COMMIT?.trim();
+  const buildTime = env.BUILD_TIME?.trim();
+
+  const headers: Record<string, string> = {
+    "X-TTRPG-MCP-Version": version && version.length > 0 ? version : "unknown",
+  };
+
+  if (commit && commit.length > 0) headers["X-TTRPG-MCP-Commit"] = commit;
+  if (buildTime && buildTime.length > 0) headers["X-TTRPG-MCP-Build-Time"] = buildTime;
+
+  return headers;
+}
+
+function withExtraHeaders(response: Response, extraHeaders: Record<string, string>): Response {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(extraHeaders)) headers.set(k, v);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
+function ensureMcpAcceptHeader(request: Request): Request {
+  const accept = request.headers.get("Accept") ?? "";
+  const hasJson = /(^|,|\s)application\/json(\s|,|;|$)/i.test(accept);
+  const hasSse = /(^|,|\s)text\/event-stream(\s|,|;|$)/i.test(accept);
+
+  if (hasJson && hasSse) return request;
+
+  const headers = new Headers(request.headers);
+  const parts = accept
+    .split(",")
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+
+  if (!hasJson) parts.push("application/json");
+  if (!hasSse) parts.push("text/event-stream");
+
+  headers.set("Accept", parts.join(", "));
+  return new Request(request, { headers });
 }
 
 function isOriginAllowed(origin: string | null, allowedOrigins: string[]): boolean {
@@ -42,23 +84,26 @@ export default {
 
     const origin = request.headers.get("Origin");
     const allowedOrigins = parseAllowedOrigins(env);
+    const fingerprintHeaders = buildFingerprintHeaders(env);
 
     if (!isOriginAllowed(origin, allowedOrigins)) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: {
           "Content-Type": "application/json",
+          ...fingerprintHeaders,
         },
       });
     }
 
     const corsHeaders = buildCorsHeaders(origin, allowedOrigins);
+    const extraHeaders = { ...corsHeaders, ...fingerprintHeaders };
 
     // Handle CORS preflight
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: corsHeaders,
+        headers: extraHeaders,
       });
     }
 
@@ -68,7 +113,7 @@ export default {
           status: 405,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders,
+            ...extraHeaders,
           },
         });
       }
@@ -85,11 +130,8 @@ export default {
         await server.connect(transport);
 
         try {
-          const resp = await transport.handleRequest(request);
-          // Ensure CORS headers are present on SDK responses.
-          const headers = new Headers(resp.headers);
-          for (const [k, v] of Object.entries(corsHeaders)) headers.set(k, v);
-          return new Response(resp.body, { status: resp.status, headers });
+          const resp = await transport.handleRequest(ensureMcpAcceptHeader(request));
+          return withExtraHeaders(resp, extraHeaders);
         } finally {
           await server.close();
         }
@@ -100,12 +142,12 @@ export default {
         status: 405,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders,
+          ...extraHeaders,
         },
       });
     }
 
     // Redirect root to GitHub Pages
-    return Response.redirect("https://ttrpg-mcp.tedt.org/", 302);
+    return withExtraHeaders(Response.redirect("https://ttrpg-mcp.tedt.org/", 302), extraHeaders);
   },
 };

@@ -11,3 +11,6 @@ routes = [
 [vars]
 DATA_BASE_URL = "https://ttrpg-mcp.tedt.org/data"
 ALLOWED_ORIGINS = "https://ttrpg-mcp.tedt.org"
+BUILD_VERSION = "dev"
+BUILD_COMMIT = ""
+BUILD_TIME = ""

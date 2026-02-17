@@ -90,6 +90,28 @@ Configured via `wrangler.toml` / Cloudflare environment variables:
 - `DATA_CACHE_TTL_SECONDS` (default: `3600`)
 - `ALLOWED_ORIGINS` (default: `https://ttrpg-mcp.tedt.org`, comma-separated)
 
+### Deployment Fingerprint (Optional)
+
+The Worker can include build/version metadata on every response so you can confirm what is currently deployed.
+
+Headers:
+
+- `X-TTRPG-MCP-Version`
+- `X-TTRPG-MCP-Commit`
+- `X-TTRPG-MCP-Build-Time`
+
+Env vars:
+
+- `BUILD_VERSION` (default: `dev`)
+- `BUILD_COMMIT` (optional)
+- `BUILD_TIME` (optional)
+
+Verify from your terminal:
+
+```bash
+curl -I https://ttrpg-mcp.tedt.org/mcp
+```
+
 ## Available Tools
 
 All 7 tools are implemented:

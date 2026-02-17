@@ -85,6 +85,12 @@ curl -X POST https://ttrpg-mcp.tedt.org/mcp \
 
 You should see JSON responses (not SSE). `GET /mcp` returns `405`.
 
+Tip: you can also inspect deployment fingerprint headers:
+
+```bash
+curl -I https://ttrpg-mcp.tedt.org/mcp
+```
+
 ### Step 5: Configure Your MCP Client
 
 Add to your MCP client config (e.g., Claude Desktop):
