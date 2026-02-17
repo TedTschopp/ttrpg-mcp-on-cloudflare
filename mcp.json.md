@@ -1,5 +1,6 @@
 ---
 layout: null
+permalink: /mcp.json
 ---
 {
   "version": "1.0.0",
@@ -9,7 +10,7 @@ layout: null
   "homepage": "{{ site.url }}{{ site.baseurl }}",
   "serverEndpoint": "{{ site.url }}{{ site.baseurl }}/mcp",
   "protocol": {
-    "version": "2024-11-05"
+    "version": "2025-11-25"
   },
   "capabilities": {
     "tools": {},

@@ -249,5 +249,5 @@ This demo page loads data directly from the GitHub Pages `/data/` directory usin
 3. Displays the result
 
 This is the same data that the MCP server uses, demonstrating how the hybrid architecture works:
-- **MCP Server** (Cloudflare Worker): Provides structured tool access via JSON-RPC
+- **MCP Server** (Cloudflare Worker): Provides structured tool access via MCP Streamable HTTP (JSON responses)
 - **GitHub Pages**: Hosts the data files publicly for direct access

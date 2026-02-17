@@ -28,8 +28,8 @@ This MCP server uses a **hybrid architecture** combining GitHub Pages (for data 
    - Free, globally distributed via GitHub's CDN
 
 2. **Cloudflare Worker (Server Layer)**
-   - Implements the MCP protocol over HTTP
-   - Handles JSON-RPC 2.0 requests
+   - Implements MCP using the official TypeScript SDK (`@modelcontextprotocol/sdk`)
+   - Uses Streamable HTTP transport in **JSON response** mode (no SSE)
    - Fetches data from GitHub Pages on-demand
    - Executes tool logic (random selection, generation)
    - Deployed at: `https://ttrpg-mcp.tedt.org/mcp`
@@ -38,14 +38,17 @@ This MCP server uses a **hybrid architecture** combining GitHub Pages (for data 
 
 **GitHub Pages:**
 - `data/*.json` - Public TTRPG data (encounters, names, locations, etc.)
-- `mcp.json` - Server manifest and documentation
+- `mcp.json.md` - Server manifest template (published as `/mcp.json`)
 - Documentation pages (README, guides, etc.)
 - `demo.md` - Interactive demo page
 
 **Cloudflare Worker:**
-- `cloudflare-mcp-server/src/index.js` - Full MCP server implementation
+- `cloudflare-mcp-server/src/index.ts` - Worker entrypoint and `/mcp` routing
+- `cloudflare-mcp-server/src/mcp/server.ts` - Registers tools/resources/prompts on `McpServer`
+- `cloudflare-mcp-server/src/tools/registry.ts` - Central tool registry (Zod schemas)
+- `cloudflare-mcp-server/src/data/fetch.ts` - JSON fetch with in-memory + Cache API caching
 - `cloudflare-mcp-server/wrangler.toml` - Worker configuration
-- Implements: `initialize`, `tools/list`, `tools/call`, `resources/list`, `resources/read`, `prompts/list`, `prompts/get`
+ - Implements: tools/resources/prompts via MCP SDK handlers
 
 ### How It Works
 
@@ -55,12 +58,8 @@ This MCP server uses a **hybrid architecture** combining GitHub Pages (for data 
 │ (VS Code,   │ ←JSON──┤ (MCP Protocol)    │ ←JSON──┤  (Data Files)   │
 │  Claude)    │         │  /mcp endpoint    │         │  /data/*.json   │
 └─────────────┘         └──────────────────┘         └─────────────────┘
-                                 │
-                        JSON-RPC 2.0 Protocol
-                        • initialize
-                        • tools/list, tools/call
-                        • resources/list, resources/read
-                        • prompts/list, prompts/get
+
+MCP uses JSON-RPC messages under the hood. This Worker responds with JSON (no SSE) and is designed to be stateless.
 ```
 
 ### Request Flow Example
@@ -145,6 +144,12 @@ To add more content:
 2. Follow the existing structure
 3. Commit and push to GitHub
 4. Changes go live automatically on GitHub Pages
+
+## Operational Notes
+
+- `/mcp` accepts `POST`; `GET /mcp` returns `405`
+- CORS is restricted via `ALLOWED_ORIGINS` (comma-separated). Requests without an `Origin` header are allowed.
+- Data reads are cached (in-memory + Cloudflare Cache API). TTL is controlled by `DATA_CACHE_TTL_SECONDS`.
 
 ## License
 

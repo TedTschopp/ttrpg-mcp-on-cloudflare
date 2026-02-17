@@ -39,23 +39,27 @@ Add this to your MCP client configuration:
   "mcpServers": {
     "ttrpg-gm-tools": {
       "url": "https://ttrpg-mcp.tedt.org/mcp",
-      "transport": "http"
+      "transport": {
+        "type": "http"
+      }
     }
   }
 }
 ```
 
-**Important:** 
+**Important:**
 - The URL is `https://ttrpg-mcp.tedt.org/mcp` (not `mcp.json`)
-- Transport is `http` (not `sse`)
+- Transport is Streamable HTTP (JSON responses), not SSE
 - You must deploy the Cloudflare Worker first (see `cloudflare-mcp-server/` folder)
 
 ### Local Development
 
 1. Clone this repository
-2. Install Jekyll: `gem install bundler jekyll`
-3. Run locally: `bundle exec jekyll serve`
-4. Visit: `http://localhost:4000/`
+2. Install Ruby 3.1+ (system Ruby 2.6/2.7 is often too old for `github-pages`)
+3. Install Bundler (if needed): `gem install bundler`
+4. Install site dependencies: `bundle install`
+5. Run locally (from the repo root): `bundle exec jekyll serve`
+6. Visit: `http://localhost:4000/`
 
 ## 📁 Structure
 
@@ -70,7 +74,11 @@ Add this to your MCP client configuration:
 │   ├── weather.json         # Weather descriptions
 │   └── plot_hooks.json      # Adventure hooks
 ├── cloudflare-mcp-server/   # Cloudflare Worker implementation
-│   └── src/index.js         # MCP server logic
+│   ├── src/index.ts         # Worker entrypoint (/mcp)
+│   ├── src/mcp/server.ts    # MCP SDK server registration (tools/resources/prompts)
+│   ├── src/tools/           # Central registry + per-tool modules
+│   ├── src/data/fetch.ts    # JSON fetch + Cloudflare caching
+│   └── test/                # Vitest smoke tests
 ├── demo.md                  # Interactive demo page
 └── index.md                 # Landing page
 ```
@@ -89,7 +97,13 @@ Once configured in your MCP client, you can use natural language to invoke tools
 - **Jekyll/Liquid** - Static site generation
 - **GitHub Pages** - Hosting
 - **JSON** - Data storage and API responses
-- **MCP** - Model Context Protocol for AI integration
+- **MCP SDK** - MCP server implementation (`@modelcontextprotocol/sdk`)
+
+## ⚙️ Runtime Behavior
+
+- `/mcp` accepts `POST` only; `GET /mcp` returns `405`
+- CORS is restricted via `ALLOWED_ORIGINS` (missing `Origin` is allowed for non-browser clients)
+- Data reads are cached (in-memory + Cloudflare Cache API)
 
 ## 📝 License
 

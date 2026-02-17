@@ -5,15 +5,12 @@ This Cloudflare Worker implements a real MCP (Model Context Protocol) server tha
 ## Problem It Solves
 
 GitHub Pages can only serve static files. The MCP protocol requires a real server that can:
+
 - Handle dynamic requests
 - Execute tool logic
 - Return formatted responses
 
 This worker bridges that gap.
-
-
-
-
 
 ## Setup
 
@@ -38,6 +35,12 @@ npx wrangler login
 npm run dev
 ```
 
+Run tests:
+
+```bash
+npm test
+```
+
 ### 4. Deploy to Cloudflare
 
 ```bash
@@ -47,6 +50,7 @@ npm run deploy
 ### 5. Configure Custom Domain
 
 In Cloudflare Dashboard:
+
 1. Go to Workers & Pages
 2. Select your worker
 3. Go to Settings → Triggers
@@ -61,17 +65,15 @@ Update your MCP client configuration to use the worker endpoint:
   "mcpServers": {
     "ttrpg-gm-tools": {
       "url": "https://ttrpg-mcp.tedt.org/mcp",
-      "transport": "http"
+      "transport": {
+        "type": "http"
+      }
     }
   }
 }
 ```
 
-**Note:** Changed from `"transport": "sse"` to `"transport": "http"` because Cloudflare Workers use HTTP, not Server-Sent Events.
-
-## Alternative: Use SSE Transport
-
-If your MCP client requires SSE transport, you'll need to use a different approach (see below).
+This Worker uses Streamable HTTP transport in **JSON response** mode (no SSE).
 
 ## How It Works
 
@@ -80,9 +82,18 @@ If your MCP client requires SSE transport, you'll need to use a different approa
 3. Executes tool logic (random selection, dice rolling, etc.)
 4. Returns formatted MCP responses
 
+## Configuration
+
+Configured via `wrangler.toml` / Cloudflare environment variables:
+
+- `DATA_BASE_URL` (default: `https://ttrpg-mcp.tedt.org/data`)
+- `DATA_CACHE_TTL_SECONDS` (default: `3600`)
+- `ALLOWED_ORIGINS` (default: `https://ttrpg-mcp.tedt.org`, comma-separated)
+
 ## Available Tools
 
 All 7 tools are implemented:
+
 - ✅ generate_encounter
 - ✅ generate_npc_name
 - ✅ generate_location_name
@@ -94,5 +105,6 @@ All 7 tools are implemented:
 ## Cost
 
 Cloudflare Workers Free Tier:
+
 - 100,000 requests per day
 - More than enough for personal use!

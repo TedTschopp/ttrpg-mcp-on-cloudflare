@@ -29,7 +29,7 @@ Create random encounters based on party level, environment type, and difficulty.
 
 Generate character names for various fantasy races and cultures.
 
-**Parameters:** race (human, elf, dwarf, orc, etc.), gender (optional)
+**Parameters:** race (human, elf, dwarf, orc, etc.), gender (male/female)
 
 ### 🏛️ Generate Location Name
 
@@ -86,7 +86,7 @@ To use this MCP server with Claude Desktop or other MCP clients, add this to you
 
 ## 📚 Resources
 
-- [GitHub Repository](https://github.com/TedTschopp/MCP-Server-Using-Github-Pages)
+- [GitHub Repository](https://github.com/TedTschopp/ttrpg-mcp-on-cloudflare)
 - [Model Context Protocol Docs](https://modelcontextprotocol.io/)
 - [View MCP Manifest](mcp.json)
 - [Quick Start Guide](QUICKSTART.html)
@@ -146,7 +146,7 @@ This server uses a hybrid architecture:
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/TedTschopp/MCP-Server-Using-Github-Pages) - View source code and contribute
+- [GitHub Repository](https://github.com/TedTschopp/ttrpg-mcp-on-cloudflare) - View source code and contribute
 
 ---
 

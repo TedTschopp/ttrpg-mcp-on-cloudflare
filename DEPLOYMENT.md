@@ -64,10 +64,26 @@ Test the MCP endpoint:
 ```bash
 curl -X POST https://ttrpg-mcp.tedt.org/mcp \
   -H "Content-Type: application/json" \
-  -d '{"method":"initialize","params":{}}'
+  -d '[
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "initialize",
+      "params": {
+        "protocolVersion": "2025-11-25",
+        "capabilities": {},
+        "clientInfo": { "name": "curl", "version": "0.0.0" }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "method": "tools/list"
+    }
+  ]'
 ```
 
-You should see a response with protocol version and capabilities.
+You should see JSON responses (not SSE). `GET /mcp` returns `405`.
 
 ### Step 5: Configure Your MCP Client
 
@@ -80,7 +96,9 @@ Add to your MCP client config (e.g., Claude Desktop):
   "mcpServers": {
     "ttrpg-gm-tools": {
       "url": "https://ttrpg-mcp.tedt.org/mcp",
-      "transport": "http"
+      "transport": {
+        "type": "http"
+      }
     }
   }
 }
@@ -104,7 +122,7 @@ Restart your MCP client to load the new server.
 ### "Server does not support streaming"
 
 This means your MCP client is trying to use SSE transport. Make sure:
-- Transport is set to `"http"` not `"sse"`
+- Transport `type` is set to `"http"` (not `"sse"`)
 - URL points to `/mcp` endpoint, not `/mcp.json`
 
 ### "Failed to fetch data"
@@ -113,6 +131,10 @@ Check that:
 - GitHub Pages is deployed and accessible
 - Data files exist at `https://ttrpg-mcp.tedt.org/data/*.json`
 - Cloudflare Worker can access GitHub Pages (check CORS)
+
+### CORS / Origin issues
+
+If calling from a browser context, ensure `ALLOWED_ORIGINS` includes your page origin (comma-separated list). Requests without an `Origin` header are allowed (typical non-browser MCP clients).
 
 ### Worker not responding
 
@@ -140,12 +162,22 @@ Then test against localhost:
 ```bash
 curl -X POST http://localhost:8787/mcp \
   -H "Content-Type: application/json" \
-  -d '{"method":"tools/list","params":{}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
+
+## Environment Variables
+
+These are configured in `cloudflare-mcp-server/wrangler.toml` (or via Cloudflare dashboard):
+
+- `DATA_BASE_URL` (default: `https://ttrpg-mcp.tedt.org/data`)
+- `DATA_CACHE_TTL_SECONDS` (default: `3600`)
+- `ALLOWED_ORIGINS` (default: `https://ttrpg-mcp.tedt.org`)
 
 ### Test GitHub Pages Locally
 
 ```bash
+# Requires Ruby 3.1+ for the `github-pages` gem
+bundle install
 bundle exec jekyll serve
 # Visit http://localhost:4000/
 ```
@@ -169,7 +201,3 @@ For personal use, both stay within free tiers! 🎉
 3. 🎨 Customize the data files
 4. 📊 Monitor usage in Cloudflare Dashboard
 5. 🚀 Share with other GMs!
-
-## Alternative: Local MCP Server
-
-If you prefer to run the server locally instead of using Cloudflare Workers, see the `ALTERNATIVE_LOCAL_SERVER.md` guide.

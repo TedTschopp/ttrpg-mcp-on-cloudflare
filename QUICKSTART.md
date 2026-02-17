@@ -77,7 +77,7 @@ Once deployed, add this to your MCP client configuration (e.g., Claude Desktop):
 ## Next Steps
 
 1. **Customize Data**: Edit JSON files in `data/` to add your own content
-2. **Test Locally**: Run `bundle exec jekyll serve` to test changes
+2. **Test Locally**: Run `bundle install && bundle exec jekyll serve` from the repo root
 3. **Push Changes**: Commit and push to automatically redeploy
 4. **Expand**: Add more tools, resources, or prompts as needed
 
@@ -89,7 +89,7 @@ Once deployed, add this to your MCP client configuration (e.g., Claude Desktop):
 
 **Jekyll serve fails?**
 - Run: `bundle update`
-- Check Ruby version (needs 2.7+)
+- Check Ruby version (Ruby 3.1+ is typically required for `github-pages`)
 
 **GitHub Pages not deploying?**
 - Check Actions tab for errors
@@ -99,7 +99,8 @@ Once deployed, add this to your MCP client configuration (e.g., Claude Desktop):
 **MCP client can't connect?**
 - Verify the URL is correct
 - Check that the site is deployed and accessible
-- Ensure `mcp.json` exists at the root URL
+- Ensure the Cloudflare Worker route is deployed for `/mcp`
+- If your client runs in a browser context, confirm its Origin is allowlisted via `ALLOWED_ORIGINS` (Worker env var)
 
 ## Adding More Content
 
@@ -113,8 +114,9 @@ Edit `data/names.json` and add to the race/gender arrays.
 Edit `data/plot_hooks.json` and add to the theme arrays.
 
 ### Add New Tools
-1. Update the Cloudflare Worker in `cloudflare-mcp-server/src/index.js`
-2. Create data source in `data/` if needed
-3. Document in README.md and demo.md
+1. Add a new tool module under `cloudflare-mcp-server/src/tools/`
+2. Register it in `cloudflare-mcp-server/src/tools/registry.ts`
+3. (Optional) Add a new JSON fixture under `data/` if needed
+4. Update docs (README/Implementation/Project Structure) as needed
 
 Happy Gaming! 🎲

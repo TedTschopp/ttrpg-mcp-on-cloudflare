@@ -19,7 +19,7 @@ description: "File organization and structure"
 ## Directory Layout
 
 ```
-MCP-Server-Using-Github-Pages/
+ttrpg-mcp-on-cloudflare/
 │
 ├── 📄 README.md                    # Main documentation
 ├── 📄 QUICKSTART.md                # Setup guide
@@ -28,9 +28,9 @@ MCP-Server-Using-Github-Pages/
 ├── 📄 Gemfile                      # Ruby dependencies
 ├── 📄 .gitignore                   # Git ignore rules
 │
-├── 🏠 index.html                   # Landing page
-├── 🎮 demo.html                    # Interactive demo
-├── 🔧 mcp.json                     # MCP server manifest
+├── 🏠 index.md                     # Landing page
+├── 🎮 demo.md                      # Interactive demo
+├── 🔧 mcp.json.md                  # MCP server manifest (published as /mcp.json)
 │
 ├── 📁 data/                        # TTRPG data files
 │   ├── encounters.json             # Random encounters by environment
@@ -42,11 +42,16 @@ MCP-Server-Using-Github-Pages/
 │   └── plot_hooks.json             # Adventure hooks by theme
 │
 ├── 📁 cloudflare-mcp-server/       # Cloudflare Worker
-│   └── src/index.js                # MCP server implementation
+│   ├── src/index.ts                # Worker entrypoint (/mcp)
+│   ├── src/mcp/server.ts           # MCP SDK server registration
+│   ├── src/tools/                  # Central registry + per-tool modules
+│   ├── src/data/fetch.ts           # JSON fetch + Cloudflare caching
+│   └── test/                       # Vitest smoke tests
 │
 └── 📁 .github/                     # GitHub configuration
     └── workflows/
         └── jekyll.yml              # Auto-deployment workflow
+    └── cloudflare-mcp-server.yml # Worker CI (lint/typecheck/test/build)
 ```
 
 ## Data Flow
@@ -60,13 +65,6 @@ MCP-Server-Using-Github-Pages/
 │  │  (manifest) │         │  (Claude,    │            │
 │  └─────────────┘         │   etc.)      │            │
 │                          └──────────────┘             │
-│  ┌─────────────┐               │                      │
-│  │ api/        │               │                      │
-│  │ tools.json  │◀──────────────┘                      │
-│  │ resources   │                                      │
-│  │ prompts     │                                      │
-│  └─────────────┘                                      │
-│                                                        │
 │  ┌─────────────┐         ┌──────────────┐            │
 │  │ data/       │────────▶│  Static      │            │
 │  │ *.json      │         │  Files       │            │
@@ -210,10 +208,10 @@ MCP-Server-Using-Github-Pages/
 5. Commit and push
 
 ### Adding New Tools
-1. Update Cloudflare Worker code in `cloudflare-mcp-server/src/index.js`
-2. Create/update data in `data/`
-3. Document in README.md
-4. Add to demo.md if interactive demo needed
+1. Add a new tool module under `cloudflare-mcp-server/src/tools/`
+2. Register it in `cloudflare-mcp-server/src/tools/registry.ts`
+3. Create/update data in `data/` (if needed)
+4. Update docs (README/Implementation/Project Structure) as needed
 
 ## License & Credits
 
