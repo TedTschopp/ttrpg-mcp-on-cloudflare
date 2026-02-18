@@ -207,7 +207,9 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
       title: "TTRPG JSON Datasets",
       description: "Reference datasets for the procedural generation tools.",
       mimeType: "application/json",
-      icons: getIconSet(env, "resources"),
+      _meta: {
+        icons: getIconSet(env, "resources"),
+      },
     },
     async (uri, variables) => {
       const rawKey = String((variables as any).dataset ?? "").toLowerCase();
@@ -239,7 +241,9 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
       {
         title: toolTitle,
         description: tool.description,
-        icons: getIconSet(env, "tools"),
+        _meta: {
+          icons: getIconSet(env, "tools"),
+        },
         // These are Zod schemas in our registry.
         inputSchema: tool.inputSchema as any,
         outputSchema: tool.outputSchema as any,
@@ -278,7 +282,6 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
     {
       title: "Session Prep",
       description: "Prepare a complete game session with encounters, NPCs, and plot hooks",
-      icons: getIconSet(env, "prompts"),
       argsSchema: {
         party_level: completable(z.number().int().min(1).max(20), (value) => {
           const prefix = String(value ?? "");
@@ -302,7 +305,10 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           return themes.filter((theme) => theme.startsWith(prefix));
         }),
       },
-    },
+      _meta: {
+        icons: getIconSet(env, "prompts"),
+      },
+    } as any,
     (args: any) => {
       const { party_level, session_theme } = args;
       return {
@@ -324,7 +330,7 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
             ],
           },
         ],
-      };
+      } as any;
     }
   );
 
@@ -333,7 +339,6 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
     {
       title: "Quick NPC",
       description: "Generate a complete NPC with name, personality, and background",
-      icons: getIconSet(env, "prompts"),
       argsSchema: {
         role: completable(z.string().min(1), (value) => {
           const roles = [
@@ -351,7 +356,10 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           return roles.filter((role) => role.startsWith(prefix));
         }),
       },
-    },
+      _meta: {
+        icons: getIconSet(env, "prompts"),
+      },
+    } as any,
     (args: any) => {
       const { role } = args;
       return {
@@ -369,7 +377,7 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
             ],
           },
         ],
-      };
+      } as any;
     }
   );
 
@@ -378,7 +386,6 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
     {
       title: "Dungeon Room",
       description: "Generate a dungeon room with encounter, treasure, and description",
-      icons: getIconSet(env, "prompts"),
       argsSchema: {
         party_level: completable(z.number().int().min(1).max(20), (value) => {
           const prefix = String(value ?? "");
@@ -396,7 +403,10 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           }
         ),
       },
-    },
+      _meta: {
+        icons: getIconSet(env, "prompts"),
+      },
+    } as any,
     (args: any) => {
       const { party_level, difficulty = "medium" } = args;
       return {
@@ -414,7 +424,7 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
             ],
           },
         ],
-      };
+      } as any;
     }
   );
 
