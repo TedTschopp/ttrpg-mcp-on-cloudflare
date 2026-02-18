@@ -207,10 +207,10 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
       title: "TTRPG JSON Datasets",
       description: "Reference datasets for the procedural generation tools.",
       mimeType: "application/json",
-      _meta: {
-        icons: getIconSet(env, "resources"),
-      },
-    },
+      // `listResourceTemplates()` surfaces `icons` per MCP spec, but the SDK
+      // types don't currently include it on this config object.
+      icons: getIconSet(env, "resources"),
+    } as any,
     async (uri, variables) => {
       const rawKey = String((variables as any).dataset ?? "").toLowerCase();
       const normalizedKey = rawKey.replace(/_/g, "-");
