@@ -87,6 +87,7 @@ This Worker uses Streamable HTTP transport in **JSON response** mode (no SSE).
 Configured via `wrangler.toml` / Cloudflare environment variables:
 
 - `DATA_BASE_URL` (default: `https://ttrpg-mcp.tedt.org/data`)
+- `SITE_BASE_URL` (optional; default: derived from `DATA_BASE_URL` by stripping `/data`)
 - `DATA_CACHE_TTL_SECONDS` (default: `3600`)
 - `ALLOWED_ORIGINS` (default: `https://ttrpg-mcp.tedt.org`, comma-separated)
 
@@ -123,6 +124,77 @@ All 7 tools are implemented:
 - ✅ generate_treasure
 - ✅ generate_weather
 - ✅ generate_plot_hook
+
+## Resources
+
+This server exposes the underlying JSON datasets as MCP resources.
+
+- `resources/list` returns concrete dataset URIs like `ttrpg://data/encounters`, `ttrpg://data/names`, etc.
+- `resources/read` reads any dataset URI and returns `application/json`.
+
+Example `resources/read` request (JSON-RPC over Streamable HTTP):
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "resources/read",
+  "params": {
+    "uri": "ttrpg://data/names"
+  }
+}
+```
+
+## Resource Templates
+
+Datasets are also registered via a resource template:
+
+- Template URI: `ttrpg://data/{dataset}`
+
+Clients can discover templates via `resources/templates/list` and then use `resources/read` with a filled-in URI.
+
+## Completions
+
+The server supports `completion/complete` for:
+
+- Prompt arguments (e.g., `quick_npc.role`, `dungeon_room.difficulty`, `session_prep.session_theme`)
+- Resource template variables (the `{dataset}` variable in `ttrpg://data/{dataset}`)
+
+Example: complete a prompt argument:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "completion/complete",
+  "params": {
+    "ref": { "type": "ref/prompt", "name": "quick_npc" },
+    "argument": { "name": "role", "value": "g" }
+  }
+}
+```
+
+Example: complete a resource template variable:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "completion/complete",
+  "params": {
+    "ref": { "type": "ref/resource", "uri": "ttrpg://data/{dataset}" },
+    "argument": { "name": "dataset", "value": "tr" }
+  }
+}
+```
+
+## Resource Links in Results
+
+Tool results and prompt messages may include `resource_link` content blocks that point at the relevant dataset URI (for example, the encounter generator links to `ttrpg://data/encounters`). This helps MCP clients surface “open the underlying data” affordances without the user needing to guess URIs.
+
+## Icons
+
+The server implementation and dataset resources include MCP `icons` metadata (light/dark SVGs) served from the GitHub Pages site under `/assets/icons/`.
 
 ## Cost
 

@@ -104,6 +104,9 @@ Once configured in your MCP client, you can use natural language to invoke tools
 - `/mcp` accepts `POST` only; `GET /mcp` returns `405`
 - CORS is restricted via `ALLOWED_ORIGINS` (missing `Origin` is allowed for non-browser clients)
 - Data reads are cached (in-memory + Cloudflare Cache API)
+- The server supports `completion/complete` for prompt args and for the resource template variable in `ttrpg://data/{dataset}`
+- Tool results and prompt messages may include `resource_link` content blocks pointing at related datasets
+- The server and dataset resources include MCP `icons` metadata (light/dark SVGs)
 
 ## 📝 License
 
