@@ -102,6 +102,33 @@ describe("mcp metadata icons", () => {
     }
   });
 
+  it("includes icons on prompts over HTTP", async () => {
+    const request = new Request("https://example.com/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "prompts/list",
+        params: {},
+      }),
+    });
+
+    const response = await worker.fetch(request, env, ctx);
+    expect(response.status).toBe(200);
+
+    const payload = (await response.json()) as any;
+    expect(payload?.result?.prompts?.length).toBeGreaterThan(0);
+
+    for (const prompt of payload.result.prompts) {
+      expect(prompt.name).toBeTruthy();
+      expectLightDarkIconSet(prompt.icons);
+    }
+  });
+
   it("includes icons on the server implementation", async () => {
     const impl = client.getServerVersion();
     expect(impl, "missing server implementation metadata").toBeTruthy();

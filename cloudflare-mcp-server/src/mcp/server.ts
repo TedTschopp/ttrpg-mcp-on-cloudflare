@@ -201,8 +201,12 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
       {
         title: toolTitle,
         description: tool.description,
-        // MCP spec uses top-level `icons` on tools.
-        icons: getIconSet(env, "tools"),
+        // The MCP spec supports icons on tools, but @modelcontextprotocol/sdk v1.26.0
+        // does not currently surface them in `tools/list`. We keep them in `_meta`
+        // and provide icons to VS Code via the HTTP `tools/list` shim.
+        _meta: {
+          icons: getIconSet(env, "tools"),
+        },
         // These are Zod schemas in our registry.
         inputSchema: tool.inputSchema as any,
         outputSchema: tool.outputSchema as any,

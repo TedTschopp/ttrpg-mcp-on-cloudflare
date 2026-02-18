@@ -3,6 +3,7 @@ import { createMcpServer } from "./mcp/server";
 import { listToolsForJsonRpc } from "./tools/registry";
 import { getInlineIconSet } from "./mcp/icons";
 import { TOOL_TITLES } from "./mcp/tool-meta";
+import { PROMPT_DEFINITIONS } from "./mcp/prompt-meta";
 
 function parseAllowedOrigins(env: Env): string[] {
   const raw = env.ALLOWED_ORIGINS?.trim();
@@ -117,6 +118,30 @@ async function tryHandleToolsListShim(request: Request): Promise<Response | unde
   return jsonRpcResponse(rpc.id, { tools });
 }
 
+async function tryHandlePromptsListShim(request: Request): Promise<Response | undefined> {
+  let body: unknown;
+  try {
+    body = await request.clone().json();
+  } catch {
+    return undefined;
+  }
+
+  if (!body || typeof body !== "object" || Array.isArray(body)) return undefined;
+  const rpc = body as JsonRpcRequest;
+  if (rpc.method !== "prompts/list") return undefined;
+
+  const icons = getInlineIconSet("prompts");
+  const prompts = PROMPT_DEFINITIONS.map((p) => ({
+    name: p.name,
+    title: p.title,
+    description: p.description,
+    arguments: p.arguments,
+    icons,
+  }));
+
+  return jsonRpcResponse(rpc.id, { prompts });
+}
+
 function isOriginAllowed(origin: string | null, allowedOrigins: string[]): boolean {
   // Non-browser or same-origin requests may omit Origin.
   if (!origin) return true;
@@ -172,6 +197,9 @@ export default {
       if (request.method === "POST") {
         const shimmedToolsList = await tryHandleToolsListShim(request);
         if (shimmedToolsList) return withExtraHeaders(shimmedToolsList, extraHeaders);
+
+        const shimmedPromptsList = await tryHandlePromptsListShim(request);
+        if (shimmedPromptsList) return withExtraHeaders(shimmedPromptsList, extraHeaders);
 
         const transport = new WebStandardStreamableHTTPServerTransport({
           // Stateless mode: create a new transport per request.
