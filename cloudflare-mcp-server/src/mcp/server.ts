@@ -5,6 +5,8 @@ import { z } from "zod";
 import type { ToolContext } from "../tools/types";
 import { TOOL_REGISTRY } from "../tools/registry";
 import { fetchJsonCached } from "../data/fetch";
+import { getInlineIconSet, type IconCategory } from "./icons";
+import { TOOL_DATASET_KEY, TOOL_TITLES } from "./tool-meta";
 
 type DatasetDefinition = {
   key: string;
@@ -81,26 +83,6 @@ function getDatasetLinkContent(datasetKey: string, overrides?: { title?: string;
   };
 }
 
-const TOOL_DATASET_KEY: Record<string, string | undefined> = {
-  generate_encounter: "encounters",
-  generate_npc_name: "names",
-  generate_location_name: "locations",
-  generate_personality: "traits",
-  generate_treasure: "treasure",
-  generate_weather: "weather",
-  generate_plot_hook: "plot-hooks",
-};
-
-const TOOL_TITLES: Record<string, string | undefined> = {
-  generate_encounter: "Generate Encounter",
-  generate_npc_name: "Generate NPC Name",
-  generate_location_name: "Generate Location Name",
-  generate_personality: "Generate Personality Traits",
-  generate_treasure: "Generate Treasure",
-  generate_weather: "Generate Weather",
-  generate_plot_hook: "Generate Plot Hook",
-};
-
 function isToolErrorResult(value: unknown): value is { error: string } {
   if (!value || typeof value !== "object") return false;
   const maybeError = (value as any).error;
@@ -112,32 +94,10 @@ function getDataBaseUrl(env: Env): string {
   return base && base.length > 0 ? base : "https://ttrpg-mcp.tedt.org/data";
 }
 
-function getSiteBaseUrl(env: Env): string {
-  const explicit = env.SITE_BASE_URL?.trim();
-  if (explicit && explicit.length > 0) return explicit.replace(/\/+$/, "");
-
-  const dataBaseUrl = getDataBaseUrl(env).replace(/\/+$/, "");
-  return dataBaseUrl.endsWith("/data") ? dataBaseUrl.slice(0, -"/data".length) : dataBaseUrl;
-}
-
-type IconCategory = "tools" | "resources" | "prompts";
-
-function getIconSet(env: Env, category: IconCategory) {
-  const base = getSiteBaseUrl(env);
-  return [
-    {
-      src: `${base}/assets/icons/${category}-light.svg`,
-      mimeType: "image/svg+xml",
-      sizes: ["any"],
-      theme: "light" as const,
-    },
-    {
-      src: `${base}/assets/icons/${category}-dark.svg`,
-      mimeType: "image/svg+xml",
-      sizes: ["any"],
-      theme: "dark" as const,
-    },
-  ];
+function getIconSet(_env: Env, category: IconCategory) {
+  // VS Code's MCP UI may not render icons that require extra network fetches.
+  // Inline data URIs are the most reliable across clients.
+  return getInlineIconSet(category);
 }
 
 function getDataCacheTtlSeconds(env: Env): number {
@@ -241,9 +201,8 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
       {
         title: toolTitle,
         description: tool.description,
-        _meta: {
-          icons: getIconSet(env, "tools"),
-        },
+        // MCP spec uses top-level `icons` on tools.
+        icons: getIconSet(env, "tools"),
         // These are Zod schemas in our registry.
         inputSchema: tool.inputSchema as any,
         outputSchema: tool.outputSchema as any,
@@ -305,9 +264,8 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           return themes.filter((theme) => theme.startsWith(prefix));
         }),
       },
-      _meta: {
-        icons: getIconSet(env, "prompts"),
-      },
+      // MCP spec uses top-level `icons` on prompts.
+      icons: getIconSet(env, "prompts"),
     } as any,
     (args: any) => {
       const { party_level, session_theme } = args;
@@ -356,9 +314,7 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           return roles.filter((role) => role.startsWith(prefix));
         }),
       },
-      _meta: {
-        icons: getIconSet(env, "prompts"),
-      },
+      icons: getIconSet(env, "prompts"),
     } as any,
     (args: any) => {
       const { role } = args;
@@ -403,9 +359,7 @@ export function createMcpServer(env: Env, ctx: ExecutionContext): McpServer {
           }
         ),
       },
-      _meta: {
-        icons: getIconSet(env, "prompts"),
-      },
+      icons: getIconSet(env, "prompts"),
     } as any,
     (args: any) => {
       const { party_level, difficulty = "medium" } = args;

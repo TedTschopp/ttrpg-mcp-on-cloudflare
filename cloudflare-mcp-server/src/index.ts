@@ -1,5 +1,8 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer } from "./mcp/server";
+import { listToolsForJsonRpc } from "./tools/registry";
+import { getInlineIconSet } from "./mcp/icons";
+import { TOOL_TITLES } from "./mcp/tool-meta";
 
 function parseAllowedOrigins(env: Env): string[] {
   const raw = env.ALLOWED_ORIGINS?.trim();
@@ -66,6 +69,54 @@ function ensureMcpAcceptHeader(request: Request): Request {
   return new Request(request, { headers });
 }
 
+type JsonRpcRequest = {
+  jsonrpc?: string;
+  id?: string | number | null;
+  method?: string;
+  params?: unknown;
+};
+
+function jsonRpcResponse(id: JsonRpcRequest["id"], result: unknown): Response {
+  return new Response(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      id: id ?? null,
+      result,
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+
+async function tryHandleToolsListShim(request: Request): Promise<Response | undefined> {
+  // Work around a current limitation in @modelcontextprotocol/sdk v1.26.0:
+  // `tools/list` responses drop `icons`, which VS Code relies on for rendering.
+  // This shim only intercepts simple, single-call JSON-RPC requests.
+  let body: unknown;
+  try {
+    body = await request.clone().json();
+  } catch {
+    return undefined;
+  }
+
+  if (!body || typeof body !== "object" || Array.isArray(body)) return undefined;
+  const rpc = body as JsonRpcRequest;
+  if (rpc.method !== "tools/list") return undefined;
+
+  const icons = getInlineIconSet("tools");
+  const tools = listToolsForJsonRpc().map((t) => ({
+    ...t,
+    title: TOOL_TITLES[t.name] ?? t.name,
+    icons,
+  }));
+
+  return jsonRpcResponse(rpc.id, { tools });
+}
+
 function isOriginAllowed(origin: string | null, allowedOrigins: string[]): boolean {
   // Non-browser or same-origin requests may omit Origin.
   if (!origin) return true;
@@ -119,6 +170,9 @@ export default {
       }
 
       if (request.method === "POST") {
+        const shimmedToolsList = await tryHandleToolsListShim(request);
+        if (shimmedToolsList) return withExtraHeaders(shimmedToolsList, extraHeaders);
+
         const transport = new WebStandardStreamableHTTPServerTransport({
           // Stateless mode: create a new transport per request.
           sessionIdGenerator: undefined,

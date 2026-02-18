@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 
 import { createMcpServer } from "../src/mcp/server";
+import worker from "../src/index";
 
 function createTestEnv(overrides?: Partial<Env>): Env {
   return {
@@ -28,8 +29,11 @@ function expectLightDarkIconSet(icons: Array<{ src: string; theme?: string; mime
   expect(light!.mimeType).toBe("image/svg+xml");
   expect(dark!.mimeType).toBe("image/svg+xml");
 
-  expect(light!.src).toMatch(/\/assets\/icons\//);
-  expect(dark!.src).toMatch(/\/assets\/icons\//);
+  // Accept either inline data URIs or hosted assets.
+  const isSvgDataUri = (src: string) => src.startsWith("data:image/svg+xml");
+  const isHostedAsset = (src: string) => /\/assets\/icons\//.test(src);
+  expect(isSvgDataUri(light!.src) || isHostedAsset(light!.src)).toBe(true);
+  expect(isSvgDataUri(dark!.src) || isHostedAsset(dark!.src)).toBe(true);
 }
 
 describe("mcp metadata icons", () => {
@@ -69,6 +73,32 @@ describe("mcp metadata icons", () => {
     // does not include `icons` even though the spec supports it.
     for (const tool of tools) {
       expect(tool.icons).toBeUndefined();
+    }
+  });
+
+  it("includes icons on tools over HTTP", async () => {
+    const request = new Request("https://example.com/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/list",
+        params: {},
+      }),
+    });
+
+    const response = await worker.fetch(request, env, ctx);
+    expect(response.status).toBe(200);
+
+    const payload = (await response.json()) as any;
+    expect(payload?.result?.tools?.length).toBeGreaterThan(0);
+
+    for (const tool of payload.result.tools) {
+      expectLightDarkIconSet(tool.icons);
     }
   });
 
