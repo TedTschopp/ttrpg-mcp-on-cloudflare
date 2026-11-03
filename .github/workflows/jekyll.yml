@@ -37,6 +37,10 @@ jobs:
           JEKYLL_ENV: production
           PAGES_REPO_NWO: ${{ github.repository }}
       
+      - name: Verify shared analytics coverage
+        run: |
+          python3 scripts/site_analytics.py _site --mode standard
+          python3 scripts/site_analytics.py _site --mode standard --check
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
