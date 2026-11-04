@@ -14,3 +14,19 @@ ALLOWED_ORIGINS = "https://ttrpg-mcp.tedt.org"
 BUILD_VERSION = "dev"
 BUILD_COMMIT = ""
 BUILD_TIME = ""
+
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+redact_query_string = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+persist = true
+head_sampling_rate = 0.1
+
+[observability.traces]
+enabled = false
+persist = false
+head_sampling_rate = 0

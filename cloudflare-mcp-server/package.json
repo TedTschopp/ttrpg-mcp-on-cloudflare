@@ -21,7 +21,7 @@
     "zod-to-json-schema": "^3.24.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260204.0",
+    "@cloudflare/workers-types": "5.20261023.1",
     "@eslint/js": "^9.19.0",
     "eslint": "^9.19.0",
     "eslint-config-prettier": "^9.1.0",
@@ -29,6 +29,6 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.22.0",
     "vitest": "^2.1.9",
-    "wrangler": "^4.42.2"
+    "wrangler": "4.153.0"
   }
 }
